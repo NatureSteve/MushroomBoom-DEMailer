@@ -1,0 +1,6 @@
+<Bindings>
+	<Binding name="DEMAILER_TOGGLE" header="DEMAILER" category="ADDONS">
+		DEMailer_ToggleDisenchantWindow()
+	</Binding>
+	<Binding name="CLICK DEMailerDisenchantButton:LeftButton" category="ADDONS"/>
+</Bindings>

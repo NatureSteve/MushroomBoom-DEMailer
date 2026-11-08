@@ -1,0 +1,18 @@
+## Interface: 16001
+## Title: DE Mailer
+## Notes: Mail your disenchantable gear to your enchanter, and disenchant it from its own window.
+## Version: 1.3.0
+## IconTexture: Interface\Icons\INV_Enchant_Disenchant
+## SavedVariables: DEMailerDB
+## SavedVariablesPerCharacter: DEMailerCharDB
+## AddonCompartmentFunc: DEMailer_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: DEMailer_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: DEMailer_OnAddonCompartmentLeave
+
+Core.lua
+UI.lua
+Options.lua
+Minimap.lua
+Disenchant.lua
+DisenchantData.lua
+DisenchantFrame.lua
