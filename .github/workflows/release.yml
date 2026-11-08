@@ -1,0 +1,60 @@
+# Publishes a release whenever the version in DEMailer.toc changes.
+# The zip unzips to a DEMailer folder, ready for Interface\AddOns.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - DEMailer.toc
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          version=$(sed -n 's/^## Version:[[:space:]]*//p' DEMailer.toc | tr -d '\r[:space:]')
+          if [ -z "$version" ]; then echo "No version in DEMailer.toc"; exit 1; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if already released
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.version.outputs.tag }} already exists."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Package and publish
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          zip="DEMailer-$VERSION.zip"
+          git archive --prefix=DEMailer/ -o "$zip" HEAD
+          {
+            echo "DE Mailer $VERSION for World of Warcraft: Forever."
+            echo
+            echo "**Install:** download \`$zip\`, unzip it into \`World of Warcraft\\_forever_\\Interface\\AddOns\\\` (you should end up with \`AddOns\\DEMailer\\DEMailer.toc\`), then fully restart the game."
+            echo
+            echo "**Changes**"
+            echo
+            git log -1 --format=%B | sed '/^Co-Authored-By:/d;/^Claude-Session:/d'
+          } > notes.md
+          gh release create "$TAG" "$zip" --target "$GITHUB_SHA" --title "DE Mailer $VERSION" --notes-file notes.md

@@ -1,0 +1,3 @@
+# Keep repository-only files out of the release zip.
+.github export-ignore
+.gitattributes export-ignore
