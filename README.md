@@ -89,5 +89,3 @@ Possible materials come from WoW Forever's disenchanting table: green armor give
 - Normal postage applies.
 - DE Mailer won't touch a letter you've started yourself. If your Send Mail tab already has items attached, send it or take them off first.
 - If the game only allows one letter per click, the button changes to **Send Next Letter**. Press it once for each letter.
-- After a game patch the addon may show as "out of date". To fix it, type `/dump select(4, GetBuildInfo())` in chat and put that number on the `## Interface:` line of `DEMailer.toc`.
-- If something goes wrong, type `/console scriptErrors 1` so the game shows error messages.
