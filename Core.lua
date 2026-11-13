@@ -196,6 +196,13 @@ local DEFAULTS = {
     excluded   = {}, -- [itemID] = true for items you never want mailed
     minimap    = { hide = false, angle = 225 }, -- angle in degrees around the minimap
     disenchant = { enabled = true, autoOpen = false }, -- the Disenchanting window
+    -- Mail groups (Groups.lua)
+    groups          = {}, -- [id] = { name, parent, order, enabled, keep, cap, items = { [itemID] = true } }
+    groupRecipients = {}, -- ["Realm-Faction"] = { [id] = "Name" }
+    groupsSelected  = {}, -- [id] = true for groups checked on the Groups tab
+    groupsCollapsed = {}, -- [id] = true for groups folded up in the lists
+    groupsAutoSend  = false,
+    nextGroupId     = 1,
 }
 ns.DEFAULTS = DEFAULTS
 
@@ -232,6 +239,8 @@ local function RealmKey()
     local faction = UnitFactionGroup("player") or "Neutral"
     return realm .. "-" .. faction
 end
+ns.RealmKey = RealmKey
+ns.Trim = Trim
 
 local function CountAttachments()
     local count = 0
@@ -845,6 +854,9 @@ function ns:ADDON_LOADED(name)
         DEMailerCharDB = type(DEMailerCharDB) == "table" and DEMailerCharDB or {}
         DEMailerCharDB.recorded = type(DEMailerCharDB.recorded) == "table" and DEMailerCharDB.recorded or {}
         self.charDB = DEMailerCharDB
+        if self.Groups then
+            self.Groups:Init()
+        end
         self:InitUI()
         self:InitExtras()
     elseif name == "Blizzard_MailFrame" then
@@ -996,6 +1008,7 @@ local function PrintHelp()
     Print("  /dem options - open DE Mailer in the game's Options")
     Print("  /dem minimap - show or hide the minimap button")
     Print("  /dem de - open or close the Disenchanting window")
+    Print("  /dem groups help - mail groups: send other items to other characters")
     local recipient = ns:GetRecipient()
     Print(("enchanter: %s, automatic sending: %s"):format(
         recipient ~= "" and recipient or "not set", ns.db.autoSend and "on" or "off"))
@@ -1041,6 +1054,12 @@ SlashCmdList.DEMAILER = function(input)
         if ns.DE then
             ns.DE:ToggleWindow()
         end
+    elseif command == "groups" or command == "group" or command == "g" then
+        ns.Groups:HandleSlash(rest)
+    elseif command == "add" then
+        ns.Groups:HandleAdd(rest)
+    elseif command == "remove" then
+        ns.Groups:HandleRemove(rest)
     elseif command == "minimap" then
         local shown = ns.db.minimap.hide
         ns:SetMinimapShown(shown)

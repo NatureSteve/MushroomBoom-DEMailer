@@ -10,6 +10,7 @@
 ## AddonCompartmentFuncOnLeave: DEMailer_OnAddonCompartmentLeave
 
 Core.lua
+Groups.lua
 UI.lua
 Options.lua
 Minimap.lua
