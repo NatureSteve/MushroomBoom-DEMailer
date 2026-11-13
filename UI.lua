@@ -476,7 +476,7 @@ function UI:Refresh()
         else
             local current = run.letters + 1
             local inFlight = (run.state == "sending" or run.state == "attaching") and 1 or 0
-            local total = math.max(current, run.letters + inFlight + letters)
+            local total = math.max(current, run.groups and run.totalLetters or (run.letters + inFlight + letters))
             if run.state == "waiting" then
                 statusText = L.WAITING
             else

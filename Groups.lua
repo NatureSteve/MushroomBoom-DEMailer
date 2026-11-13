@@ -1095,6 +1095,14 @@ SUBCOMMANDS.dry = function(rest)
     Groups:PrintPlan(Trim(rest):lower() == "all")
 end
 
+SUBCOMMANDS.send = function(rest)
+    local all = Trim(rest):lower() == "all"
+    local ok, reason = ns:StartGroups("slash", true, all)
+    if not ok and reason then
+        Print(reason)
+    end
+end
+
 SUBCOMMANDS.list = function()
     Groups:PrintTree()
 end
@@ -1111,6 +1119,7 @@ local function PrintGroupsHelp()
     Print("  /dem groups on|off Herbs - switch a group (and its subgroups) on or off")
     Print("  /dem groups check|uncheck Herbs - include it when sending from the Groups tab")
     Print("  /dem groups dry - show what would be sent (dry all: every group)")
+    Print("  /dem groups send - send your checked groups now, at a mailbox (send all: every group)")
     Print("  /dem add Herbs <shift-click items> - put items in a group")
     Print("  /dem remove <shift-click items> - take items out of their group")
 end

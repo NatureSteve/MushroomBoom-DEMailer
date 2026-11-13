@@ -287,6 +287,10 @@ local function IsSecret(value)
     return issecretvalue ~= nil and issecretvalue(value)
 end
 
+ns.CountAttachments = CountAttachments
+ns.FirstFreeAttachmentSlot = FirstFreeAttachmentSlot
+ns.HasPendingMoney = HasPendingMoney
+
 -------------------------------------------------------------------------------
 -- Settings
 -------------------------------------------------------------------------------
@@ -624,6 +628,11 @@ function ns:SendNextLetter(fromClick)
         return self:Finish("cursor")
     end
 
+    -- Mail group runs fill their letters in GroupsSend.lua.
+    if run.groups then
+        return self:SendNextGroupLetter(fromClick)
+    end
+
     local items, sendable = self:ScanBags()
     if sendable == 0 then
         return self:Finish("done")
@@ -700,7 +709,7 @@ function ns:DoSend(fromClick)
     local token = run.token
     self:Notify()
 
-    SendMail(run.recipient, L.SUBJECT, "")
+    SendMail(run.recipient, run.subject or L.SUBJECT, "")
 
     C_Timer.After(SEND_TIMEOUT, function()
         if self.run == run and run.state == "sending" and run.token == token then
@@ -731,14 +740,23 @@ function ns:PauseForClick(afterLetter)
         return
     end
     self.needsClick = true
-    if afterLetter and self:CountSendable() == 0 then
+    if afterLetter and self:CountLeftToSend() == 0 then
         return self:Finish("done")
     end
     run.state = "paused"
     if run.trigger == "auto" and run.letters == 0 then
-        Print(L.AUTO_NEEDS_CLICK:format(self:CountSendable()))
+        Print(L.AUTO_NEEDS_CLICK:format(self:CountLeftToSend()))
     end
     self:Notify()
+end
+
+-- What the current run still has to send.
+function ns:CountLeftToSend()
+    local run = self.run
+    if run and run.groups then
+        return self:CountGroupItemsLeft()
+    end
+    return self:CountSendable()
 end
 
 function ns:ReturnAttachments()
@@ -763,7 +781,7 @@ function ns:Finish(result, detail)
         SetSendMailShowing(false)
     end
 
-    local who = run.recipient
+    local who = run.groups and self:GroupRecipientsText(run) or run.recipient
     local msg, kind
     if result == "done" then
         if run.items > 0 then
@@ -790,6 +808,9 @@ function ns:Finish(result, detail)
     end
     if run.skipped and result == "done" and run.items > 0 then
         msg = msg .. " " .. L.SKIPPED
+    end
+    if run.groups and run.groups.noSpace and result == "done" and run.items > 0 then
+        msg = msg .. " " .. L.G_NO_SPACE
     end
 
     if result == "closed" then
@@ -913,7 +934,11 @@ function ns:MAIL_SEND_SUCCESS()
         return
     end
     run.letters = run.letters + 1
-    run.items = run.items + run.attached
+    if run.groups then
+        run.items = run.items + self:OnGroupLetterSent()
+    else
+        run.items = run.items + run.attached
+    end
     run.attached = 0
     self:ReleaseHiddenFocusSoon()
 
