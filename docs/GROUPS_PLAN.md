@@ -1,11 +1,10 @@
 # DE Mailer: Mail Groups — plan
 
-Status: **steps 0–3 done (2026-11-13), waiting for an in-game check.** Step 1 and the
-step 3 dry run were written 2026-11-12; step 2 (sending) on 2026-11-13. Both are covered
-by automated tests run outside the game (Lua 5.1 with a simulated WoW API): 26 for the
-existing features and 17 for groups. To try sending in game before the Groups tab
-exists: `/dem groups send` (or `send all`) at a mailbox. This file is not loaded by
-the game or included in releases.
+Status: **steps 0–5 done (2026-11-14), waiting for an in-game check.** Step 6 (README
+and the 1.4.0 version bump) is left. Covered by automated tests run outside the game
+(Lua 5.1 with a simulated WoW API): 26 for the existing features, 17 for group data and
+sending, and 7 for the group editor and the Groups tab. This file is not loaded by the
+game or included in releases.
 
 Release name for 1.4.0: **DE Mail Groups** (the `## X-Release-Title:` line in
 `DEMailer.toc`; remove or change it for the next version).
@@ -140,7 +139,7 @@ nothing you've set up is lost.
 | File | Change |
 |---|---|
 | `Groups.lua` (new) | Group tree: create, rename, move, delete, add/remove items, inheritance, item → group lookup, the "what to send" calculation |
-| `GroupsFrame.lua` (new) | The group editor window, bag alt-click hook, drag-and-drop, tooltip line |
+| `GroupsFrame.lua` (new) | The group editor window, bag alt-click hook (best effort: bag buttons the game made before the addon loaded don't carry it), drag-and-drop, tooltip line |
 | `GroupsTab.lua` (new) | The Groups mailbox tab |
 | `GroupsSend.lua` (new) | Sending groups: plan once, then letters per recipient; splits a partial stack into a free bag slot (at most one split per item) |
 | `Core.lua` | Small hooks so its send loop handles group runs; new slash commands, defaults |
@@ -159,8 +158,8 @@ nothing you've set up is lost.
 2. (done) Send queue (`GroupsSend.lua` + hooks in `Core.lua`): several recipients per run, stack splitting. Disenchant
    sending keeps working exactly as now.
 3. (done) A **dry run** (`/dem groups dry`) that prints what would go to whom without sending.
-4. Group editor window and ways to add items.
-5. Groups mailbox tab, Options and minimap changes.
+4. (done) Group editor window and ways to add items.
+5. (done) Groups mailbox tab, Options and minimap changes.
 6. README and version bump.
 
 ## How it'll be checked

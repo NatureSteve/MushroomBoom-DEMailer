@@ -28,7 +28,7 @@ local function CreatePopup()
 
     local title = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     title:SetPoint("TOP", 0, -20)
-    title:SetText(L.NAME_PROMPT)
+    frame.title = title
 
     local realmText = frame:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
     realmText:SetPoint("TOP", title, "BOTTOM", 0, -4)
@@ -50,10 +50,11 @@ local function CreatePopup()
 
     local function Accept()
         local onAccept = frame.onAccept
-        ns:SetRecipient(box:GetText())
+        local text = box:GetText()
+        frame.onAccept = nil
         frame:Hide()
         if onAccept then
-            onAccept()
+            onAccept(text)
         end
     end
     local function Cancel()
@@ -70,19 +71,32 @@ local function CreatePopup()
     return frame
 end
 
--- Opens the popup. onAccept runs after a new name is saved.
-function Options:EditRecipient(onAccept)
+-- A small game-style box asking for one line of text. onAccept(text) runs
+-- when you press Okay or Enter; Cancel or Escape just closes it.
+function ns.ShowPrompt(title, subtitle, text, onAccept)
     popup = popup or CreatePopup()
-    local realm, faction = ns:GetRealmAndFaction()
-    popup.realmText:SetText(L.NAME_REALM:format(realm, faction))
-    popup.box:SetText(ns:GetRecipient())
+    popup.title:SetText(title)
+    popup.realmText:SetText(subtitle or "")
+    popup.box:SetText(text or "")
     popup.onAccept = onAccept
     popup:Show()
+    popup:Raise()
     popup.box:SetFocus()
     popup.box:HighlightText()
     if SOUNDKIT then
         PlaySound(SOUNDKIT.IG_MAINMENU_OPEN)
     end
+end
+
+-- Asks for your enchanter's name. onAccept runs after it's saved.
+function Options:EditRecipient(onAccept)
+    local realm, faction = ns:GetRealmAndFaction()
+    ns.ShowPrompt(L.NAME_PROMPT, L.NAME_REALM:format(realm, faction), ns:GetRecipient(), function(text)
+        ns:SetRecipient(text)
+        if onAccept then
+            onAccept()
+        end
+    end)
 end
 
 -------------------------------------------------------------------------------
@@ -168,6 +182,21 @@ function Options:Create()
         ns:ResetExcluded()
     end, L.KEPT_ITEMS_TIP, false)
     layout:AddInitializer(keptRow)
+
+    -- Mail groups
+    layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L.GE_TITLE))
+    AddCheckbox("DEMAILER_GROUPS_AUTO", L.OPT_GROUPS_AUTO, L.GT_AUTO_TIP, false,
+        function()
+            return ns.db.groupsAutoSend and true or false
+        end,
+        function(value)
+            ns:SetGroupsAutoSend(value)
+        end)
+    local editorRow = CreateSettingsButtonInitializer(L.OPT_GROUP_EDITOR, L.DE_OPEN, function()
+        ns.GroupsEditor:Open()
+    end, L.OPT_GROUP_EDITOR_TIP, false)
+    editorRow:AddSearchTags(L.GE_TITLE, L.OPT_GROUP_EDITOR)
+    layout:AddInitializer(editorRow)
 
     -- Disenchanting
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L.DISENCHANTING))

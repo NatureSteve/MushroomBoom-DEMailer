@@ -386,15 +386,21 @@ end
 
 -- A status message for the Disenchant tab. Sticky messages (results of a
 -- send) stay until you change something; others clear when your bags do.
-function ns:SetMessage(text, kind, sticky)
+-- owner is "groups" for messages about mail groups (shown on the Groups
+-- tab); nil for the Disenchant tab.
+function ns:SetMessage(text, kind, sticky, owner)
     self.message = text
     self.messageKind = kind
     self.messageSticky = sticky and true or false
+    self.messageFor = text and owner or nil
 end
 
 function ns:Notify()
     if self.UI and self.UI.Refresh then
         self.UI:Refresh()
+    end
+    if self.GroupsTab and self.GroupsTab.Refresh then
+        self.GroupsTab:Refresh()
     end
 end
 
@@ -410,6 +416,9 @@ function ns:OnSettingsChanged()
     end
     if self.DE and self.DE.OnSettingsChanged then
         self.DE:OnSettingsChanged()
+    end
+    if self.GroupsEditor then
+        self.GroupsEditor:Refresh()
     end
 end
 
@@ -745,7 +754,7 @@ function ns:PauseForClick(afterLetter)
     end
     run.state = "paused"
     if run.trigger == "auto" and run.letters == 0 then
-        Print(L.AUTO_NEEDS_CLICK:format(self:CountLeftToSend()))
+        Print((run.groups and L.GT_AUTO_NEEDS_CLICK or L.AUTO_NEEDS_CLICK):format(self:CountLeftToSend()))
     end
     self:Notify()
 end
@@ -819,7 +828,7 @@ function ns:Finish(result, detail)
         end
         self:SetMessage(nil)
     else
-        self:SetMessage(msg, kind, result ~= "cursor" and result ~= "attachments")
+        self:SetMessage(msg, kind, result ~= "cursor" and result ~= "attachments", run.groups and "groups" or nil)
         -- Keep a record in chat of what went out, and of problems with
         -- automatic sends (the Disenchant tab may not be open).
         if msg and (run.items > 0 or (run.trigger == "auto" and kind == "bad")) then

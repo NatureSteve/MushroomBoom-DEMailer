@@ -13,7 +13,9 @@
 Core.lua
 Groups.lua
 GroupsSend.lua
+GroupsFrame.lua
 UI.lua
+GroupsTab.lua
 Options.lua
 Minimap.lua
 Disenchant.lua

@@ -1103,6 +1103,10 @@ SUBCOMMANDS.send = function(rest)
     end
 end
 
+SUBCOMMANDS.edit = function()
+    ns.GroupsEditor:Open()
+end
+
 SUBCOMMANDS.list = function()
     Groups:PrintTree()
 end
@@ -1110,7 +1114,7 @@ SUBCOMMANDS.dump = SUBCOMMANDS.list
 
 local function PrintGroupsHelp()
     Print("group commands:")
-    Print("  /dem groups - list your groups")
+    Print("  /dem groups - list your groups (/dem groups edit: open the group editor)")
     Print("  /dem groups new Herbs > Northrend - make a group (and any missing groups above it)")
     Print("  /dem groups to Herbs = Name - who gets this group (= same: like the group above)")
     Print("  /dem groups keep Herbs = 20 - how many of each item stays in your bags")

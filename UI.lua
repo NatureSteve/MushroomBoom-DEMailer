@@ -309,6 +309,12 @@ function UI:Create()
 
     -- Hide the page whenever one of the game's own tabs is chosen, and
     -- when the mailbox closes.
+    self.title = L.TITLE
+    table.insert(ns.mailPages, self)
+    if ns.GroupsTab then
+        ns.GroupsTab:Create()
+    end
+
     hooksecurefunc("MailFrameTab_OnClick", function()
         UI:HidePage()
     end)
@@ -341,9 +347,15 @@ local function ReleaseHiddenMailFocus()
     end
 end
 
-function UI:ShowPage()
-    if not self.created or self.page:IsShown() then
-        return
+-- DE Mailer's pages on the mailbox (Disenchant, Groups). Each has a page,
+-- a tab, a title and a HidePage method. Showing one hides the others.
+ns.mailPages = {}
+
+function ns.ShowMailPage(owner)
+    for _, other in ipairs(ns.mailPages) do
+        if other ~= owner then
+            other:HidePage()
+        end
     end
     for i = 1, 2 do
         local blizzardTab = _G["MailFrameTab" .. i]
@@ -351,7 +363,7 @@ function UI:ShowPage()
             PanelTemplates_DeselectTab(blizzardTab)
         end
     end
-    PanelTemplates_SelectTab(self.tab)
+    PanelTemplates_SelectTab(owner.tab)
 
     if InboxFrame then
         InboxFrame:Hide()
@@ -369,12 +381,19 @@ function UI:ShowPage()
     if not ns.run then
         SetSendMailShowing(false)
     end
-    MailFrame:SetTitle(L.TITLE)
+    MailFrame:SetTitle(owner.title)
 
-    self.page:Show()
+    owner.page:Show()
     if SOUNDKIT then
         PlaySound(SOUNDKIT.IG_SPELLBOOK_OPEN)
     end
+end
+
+function UI:ShowPage()
+    if not self.created or self.page:IsShown() then
+        return
+    end
+    ns.ShowMailPage(self)
 end
 
 function UI:HidePage()
@@ -487,7 +506,7 @@ function UI:Refresh()
     else
         local ok, result = ns:CanStart()
         buttonText, enabled = L.SEND, ok
-        if ns.message then
+        if ns.message and ns.messageFor ~= "groups" then
             statusText, kind = ns.message, ns.messageKind
         elseif ok then
             statusText = L.READY:format(result, ns:GetRecipient())
