@@ -1,13 +1,11 @@
 # DE Mailer: Mail Groups — plan
 
-Status: **steps 0–5 done (2026-11-14), waiting for an in-game check.** Step 6 (README
-and the 1.4.0 version bump) is left. Covered by automated tests run outside the game
-(Lua 5.1 with a simulated WoW API): 26 for the existing features, 17 for group data and
-sending, and 7 for the group editor and the Groups tab. This file is not loaded by the
-game or included in releases.
+Status: **done (2026-11-16), released as DE Mail Groups, version 2.0.0.** Covered by
+automated tests run outside the game (Lua 5.1 with a simulated WoW API), and checked
+in game by the user. This file is not loaded by the game or included in releases.
 
-Release name for 1.4.0: **DE Mail Groups** (the `## X-Release-Title:` line in
-`DEMailer.toc`; remove or change it for the next version).
+The `## X-Release-Title: DE Mail Groups` line in `DEMailer.toc` names the 2.0.0
+release; change or remove it for the next version.
 
 ## Goal
 
@@ -146,7 +144,7 @@ nothing you've set up is lost.
 | `UI.lua` | Small changes so two DE Mailer tabs sit side by side and hide each other correctly |
 | `Options.lua` | "Mail Groups" section |
 | `Minimap.lua` | "Open Mail Groups" in the right-click menu |
-| `DEMailer.toc` | Load the three new files; version 1.4.0 |
+| `DEMailer.toc` | Load the three new files; version 2.0.0 |
 | `README.md` | Document the feature |
 
 ## Steps
@@ -160,7 +158,7 @@ nothing you've set up is lost.
 3. (done) A **dry run** (`/dem groups dry`) that prints what would go to whom without sending.
 4. (done) Group editor window and ways to add items.
 5. (done) Groups mailbox tab, Options and minimap changes.
-6. README and version bump.
+6. (done) README and version bump (2.0.0).
 
 ## How it'll be checked
 

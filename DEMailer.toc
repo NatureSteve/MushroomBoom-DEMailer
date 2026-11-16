@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: DE Mailer
-## Notes: Mail your disenchantable gear to your enchanter, and disenchant it from its own window.
-## Version: 1.3.0
+## Notes: Mail your disenchantable gear to your enchanter and other items to your other characters, and disenchant from its own window.
+## Version: 2.0.0
 ## X-Release-Title: DE Mail Groups
 ## IconTexture: Interface\Icons\INV_Enchant_Disenchant
 ## SavedVariables: DEMailerDB

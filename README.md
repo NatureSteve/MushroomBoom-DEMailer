@@ -1,6 +1,6 @@
 # DE Mailer
 
-Mails the disenchantable gear in your bags to your enchanter, right from the mailbox, and gives your enchanter a Disenchanting window to work through it. Made for World of Warcraft: Forever.
+Mails the disenchantable gear in your bags to your enchanter, right from the mailbox, and gives your enchanter a Disenchanting window to work through it. **Mail groups** send everything else to the right character too: herbs to your alchemist, cloth to your tailor, ore to your smith. Made for World of Warcraft: Forever.
 
 ## Install
 
@@ -22,6 +22,37 @@ Other options on the tab:
 - **Click an item** to keep it. It stays in your bags and is greyed out with a red X. Click it again to send it after all.
 - **Send automatically when I open a mailbox:** sends without a click. Hold **Shift** while opening the mailbox to skip it once.
 
+## Mail groups
+
+Put items into your own groups, choose who gets each group, and send them all from the mailbox with one press.
+
+**Make groups** in the **Mail Groups** editor. To open it, use **Edit Groups** on the Groups tab, **Open Mail Groups** in the minimap button's menu, the button in the options, or `/dem groups edit`.
+
+- **New Group** and **New Subgroup** make groups. Groups can sit inside each other, up to five levels (for example Herbs > Northrend).
+- **Send to**, **Keep** and **Send at most** are set per group:
+  - **Keep** is how many of each item stays in your bags.
+  - **Send at most** limits each item per send (0 means no limit).
+  - Leave a box empty to use the group above; a grey line shows what that is.
+- **Add items** by dragging them onto a group or into its item area, or by Alt-clicking them in your bags while the editor is open. An item can be in only one group.
+- **Right-click a group** to rename it, move it (with everything inside it), switch it off, or delete it. When deleting, choose whether its items and subgroups move up a level or go too.
+- **Right-click an item** in the editor to take it out of the group.
+- Item tooltips show which group an item is in and who gets it.
+
+**Send them** from the new **Groups** tab on the mailbox, next to Disenchant:
+
+- Tick the groups to send. A ticked group includes the groups inside it, and a switched-off group is never sent.
+- The tab shows who gets each group, how much is ready, and the items going out. Press **Send**.
+- Each recipient gets their own letters, 12 attachments each. When only part of a stack should go, DE Mailer splits it into a free bag slot first, which needs one empty slot in an ordinary bag.
+- **Send checked groups when I open a mailbox** sends without a click, right after the Disenchant tab's automatic send. Hold **Shift** while opening the mailbox to skip it once.
+- Recipients are remembered separately for each realm and faction.
+
+Group commands: `/dem groups help` lists them all. The most useful:
+
+- `/dem groups`: list your groups
+- `/dem groups dry`: show what would be sent, without sending (`dry all` for every group)
+- `/dem groups send`: send your checked groups now, at a mailbox (`send all` for every group)
+- `/dem add Herbs [item]`: put shift-clicked items in a group
+
 ## Options and minimap
 
 The same settings are also available away from the mailbox:
@@ -31,6 +62,7 @@ The same settings are also available away from the mailbox:
   - **Item Qualities:** Uncommon, Rare and Epic, for both mailing and disenchanting.
   - **Send Automatically**.
   - **Items You Keep:** reset to send kept items again.
+  - **Send Groups Automatically** and a button to open the **Group Editor**.
   - **Disenchanting Window**, **Open When You Pick Up Gear** and **Show Materials in Tooltips** (see below).
   - **Show Minimap Button**.
 - **Minimap button:**
@@ -84,6 +116,7 @@ Possible materials come from WoW Forever's disenchanting table: green armor give
 - `/dem options`: open DE Mailer in the Options window
 - `/dem minimap`: show or hide the minimap button
 - `/dem de`: open or close the Disenchanting window
+- `/dem groups ...`: mail groups (see above)
 
 ## Good to know
 
