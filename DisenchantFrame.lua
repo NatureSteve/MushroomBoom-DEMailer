@@ -52,21 +52,7 @@ local function ItemInfoLine(item)
     return table.concat(parts, "   ")
 end
 
-local function FormatChance(chance)
-    if chance == math.floor(chance) then
-        return ("%d%%"):format(chance)
-    end
-    return ("%.1f%%"):format(chance)
-end
-
-local function FormatCount(minCount, maxCount)
-    if not minCount then
-        return nil
-    elseif minCount == maxCount then
-        return tostring(minCount)
-    end
-    return ("%d-%d"):format(minCount, maxCount)
-end
+local FormatChance = ns.FormatChance
 
 -------------------------------------------------------------------------------
 -- Position
@@ -531,15 +517,7 @@ function Frame:Refresh()
     for i, line in ipairs(self.possibleLines) do
         local entry = possible and possible[i]
         if entry then
-            local name, icon, quality = ns.MaterialInfo(entry.itemID)
-            local label = ns.ColorByQuality(name, quality)
-            local count = FormatCount(entry.min, entry.max)
-            if count then
-                label = L.DE_COUNT:format(label, count)
-            end
-            if icon then
-                label = ("|T%s:0|t %s"):format(icon, label)
-            end
+            local label = ns.MaterialLabel(entry)
             line.itemID = entry.itemID
             line.chanceText = FormatChance(entry.chance)
             line.chance:SetText(line.chanceText)

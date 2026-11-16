@@ -143,3 +143,79 @@ function ns.MaterialInfo(itemID)
     local quality = C_Item.GetItemQualityByID and C_Item.GetItemQualityByID(itemID)
     return name or NAMES[itemID] or ("item " .. itemID), icon, quality or QUALITIES[itemID]
 end
+
+-------------------------------------------------------------------------------
+-- Possible materials in item tooltips (Options > Disenchanting)
+-------------------------------------------------------------------------------
+
+local L = ns.L
+L.DE_TOOLTIP_OPTION     = "Show Materials in Tooltips"
+L.DE_TOOLTIP_OPTION_TIP = "Add what an item usually gives when disenchanted to its tooltip."
+L.DE_TOOLTIP_HEADER     = "Disenchants into:"
+
+function ns.FormatChance(chance)
+    if chance == math.floor(chance) then
+        return ("%d%%"):format(chance)
+    end
+    return ("%.1f%%"):format(chance)
+end
+
+function ns.FormatCount(minCount, maxCount)
+    if not minCount then
+        return nil
+    elseif minCount == maxCount then
+        return tostring(minCount)
+    end
+    return ("%d-%d"):format(minCount, maxCount)
+end
+
+-- "[icon] Strange Dust (1-2)", colored by the material's quality.
+function ns.MaterialLabel(entry)
+    local name, icon, quality = ns.MaterialInfo(entry.itemID)
+    local label = ns.ColorByQuality(name, quality)
+    local count = ns.FormatCount(entry.min, entry.max)
+    if count then
+        label = L.DE_COUNT:format(label, count)
+    end
+    if icon then
+        label = ("|T%s:0|t %s"):format(icon, label)
+    end
+    return label
+end
+
+local function IsSecret(value)
+    return issecretvalue ~= nil and issecretvalue(value)
+end
+
+local function AddMaterials(tooltip, data)
+    if (tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip) or not ns.db or not ns.db.disenchant.tooltip then
+        return
+    end
+    local itemID = data and data.id
+    if not itemID or IsSecret(itemID) then
+        return
+    end
+    local link = tooltip.GetItem and select(2, tooltip:GetItem())
+    if link and IsSecret(link) then
+        link = nil
+    end
+    local quality = C_Item.GetItemQualityByID(link or itemID)
+    local info = { itemID = itemID, quality = quality, hyperlink = link }
+    if not ns:IsDisenchantableItem(info) then
+        return
+    end
+    local itemLevel = C_Item.GetDetailedItemLevelInfo(link or itemID)
+    local materials = ns.PossibleMaterials(itemID, quality, itemLevel)
+    if not materials then
+        return
+    end
+    tooltip:AddLine(" ")
+    tooltip:AddLine(L.DE_TOOLTIP_HEADER, 1, 0.82, 0)
+    for _, entry in ipairs(materials) do
+        tooltip:AddLine(("  %s  %s"):format(ns.FormatChance(entry.chance), ns.MaterialLabel(entry)), 1, 1, 1)
+    end
+end
+
+if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, AddMaterials)
+end

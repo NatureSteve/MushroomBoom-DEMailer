@@ -214,6 +214,13 @@ function Options:Create()
         function(value)
             ns:SetDisenchantAutoOpen(value)
         end)
+    AddCheckbox("DEMAILER_DE_TOOLTIP", L.DE_TOOLTIP_OPTION, L.DE_TOOLTIP_OPTION_TIP, true,
+        function()
+            return ns.db.disenchant.tooltip and true or false
+        end,
+        function(value)
+            ns:SetDisenchantTooltip(value)
+        end)
 
     -- Minimap
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L.MINIMAP))

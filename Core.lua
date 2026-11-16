@@ -195,7 +195,7 @@ local DEFAULTS = {
     autoSend   = false,
     excluded   = {}, -- [itemID] = true for items you never want mailed
     minimap    = { hide = false, angle = 225 }, -- angle in degrees around the minimap
-    disenchant = { enabled = true, autoOpen = false }, -- the Disenchanting window
+    disenchant = { enabled = true, autoOpen = false, tooltip = true }, -- the Disenchanting window and tooltips
     -- Mail groups (Groups.lua)
     groups          = {}, -- [id] = { name, parent, order, enabled, keep, cap, items = { [itemID] = true } }
     groupRecipients = {}, -- ["Realm-Faction"] = { [id] = "Name" }
@@ -344,6 +344,11 @@ end
 
 function ns:SetDisenchantEnabled(enabled)
     self.db.disenchant.enabled = enabled and true or false
+    self:OnSettingsChanged()
+end
+
+function ns:SetDisenchantTooltip(enabled)
+    self.db.disenchant.tooltip = enabled and true or false
     self:OnSettingsChanged()
 end
 
