@@ -363,7 +363,8 @@ end
 -------------------------------------------------------------------------------
 
 function Tab:Refresh()
-    if not self.created or not ns.db or not Groups.db then
+    -- The tab only shows at a mailbox: skip working out a send elsewhere.
+    if not self.created or not ns.db or not Groups.db or not ns.mailOpen then
         return
     end
     local plan = Groups:BuildPlan(false)

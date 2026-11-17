@@ -440,7 +440,8 @@ function UI:UpdateTabLabel(sendable)
 end
 
 function UI:Refresh()
-    if not self.created or not ns.db then
+    -- The tab and its count only show at a mailbox: skip the bag scan elsewhere.
+    if not self.created or not ns.db or not ns.mailOpen then
         return
     end
     local items, sendable = ns:ScanBags()

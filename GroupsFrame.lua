@@ -78,9 +78,12 @@ local function DropCursorItemOn(id)
         return false
     end
     ClearCursor()
-    Groups:AddItems(id, { itemID })
+    Editor:FinishEdits()
+    Editor.selected = id -- the add below redraws the window once
+    if Groups:AddItems(id, { itemID }) == 0 then
+        Editor:Refresh()
+    end
     Play("IG_BACKPACK_COIN_SELECT")
-    Editor:Select(id)
     return true
 end
 
@@ -605,13 +608,17 @@ function Editor:Toggle()
     end
 end
 
-function Editor:Select(id)
-    -- Finish any edit for the group being left first.
+-- Saves any box being typed in, for the group it belongs to.
+function Editor:FinishEdits()
     for _, box in ipairs({ self.recipientBox, self.keepBox, self.capBox }) do
         if box and box:HasFocus() then
             box:ClearFocus()
         end
     end
+end
+
+function Editor:Select(id)
+    self:FinishEdits()
     self.selected = id
     self:Refresh()
 end

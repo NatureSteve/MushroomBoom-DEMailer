@@ -123,6 +123,7 @@ function DE:Refresh()
 end
 
 function DE:OnSettingsChanged()
+    self:TakeStockIfNeeded()
     self:Refresh()
 end
 
@@ -156,55 +157,54 @@ function DE:Start()
     end)
     self:RememberEquipped()
     self.ready = true
-    self:Prune()
+    self.needsStock = not self:IsActive()
+    if not self.needsStock then
+        self:Sync(true)
+    end
     self:Refresh()
 end
 
--- Records gear that just arrived. Returns true if any of it is on the list.
-function DE:CheckNewItems()
-    if not self.ready then
-        return false
+-- Disenchanting just became possible (learned it, or switched the window
+-- on): take stock right away so the next pick-up is recorded.
+function DE:TakeStockIfNeeded()
+    if self.ready and self.needsStock and self:IsActive() then
+        self.needsStock = false
+        self:Sync(true)
     end
-    local record = self:IsActive() and next(self.pausedBy) == nil
-    local recorded = ns.charDB.recorded
-    local listedNew = false
-    ForEachBagItem(function(bag, slot, info)
-        local guid = GetBagItemGUID(bag, slot)
-        if guid and not self.known[guid] then
-            self.known[guid] = true
-            if record and ns:IsDisenchantableItem(info) then
-                recorded[guid] = info.itemID
-                if self:IsListable(bag, slot, info) and not ns.db.excluded[info.itemID] then
-                    listedNew = true
-                end
-            end
-        end
-    end)
-    return listedNew
 end
 
--- Forgets recorded gear that has left your bags (disenchanted, sold, mailed).
-function DE:Prune()
-    if not self.ready then
-        return
-    end
-    local present, count = {}, 0
-    ForEachBagItem(function(bag, slot)
+-- One pass over the bags: records gear that just arrived, and forgets
+-- recorded gear that has left. Returns true if anything new is listed.
+-- With stockOnly, everything is just noted as already yours.
+function DE:Sync(stockOnly)
+    local record = not stockOnly and next(self.pausedBy) == nil
+    local recorded = ns.charDB.recorded
+    local present, count, listedNew = {}, 0, false
+    ForEachBagItem(function(bag, slot, info)
         local guid = GetBagItemGUID(bag, slot)
         if guid then
             present[guid] = true
             count = count + 1
+            if not self.known[guid] then
+                self.known[guid] = true
+                if record and ns:IsDisenchantableItem(info) then
+                    recorded[guid] = info.itemID
+                    if self:IsListable(bag, slot, info) and not ns.db.excluded[info.itemID] then
+                        listedNew = true
+                    end
+                end
+            end
         end
     end)
-    if count == 0 then
-        return -- bags not loaded yet
-    end
-    for guid in pairs(ns.charDB.recorded) do
-        if not present[guid] then
-            ns.charDB.recorded[guid] = nil
-            self.failures[guid], self.skipped[guid] = nil, nil
+    if count > 0 then -- 0: bags not loaded yet
+        for guid in pairs(recorded) do
+            if not present[guid] then
+                recorded[guid] = nil
+                self.failures[guid], self.skipped[guid] = nil, nil
+            end
         end
     end
+    return listedNew
 end
 
 -- Gear that can go on the list: disenchantable, a quality you chose, not a
@@ -439,8 +439,18 @@ function DE:BAG_UPDATE_DELAYED()
     if not self.ready then
         return
     end
-    local listedNew = self:CheckNewItems()
-    self:Prune()
+    -- Characters without Disenchant (or with the window switched off) skip
+    -- all of this. When it comes on, it first takes stock, so what you had
+    -- isn't recorded as new.
+    if not self:IsActive() then
+        self.needsStock = true
+        return
+    end
+    if self.needsStock then
+        self.needsStock = false
+        self:Sync(true)
+    end
+    local listedNew = self:Sync(false)
     self:Refresh()
     if listedNew and ns.db.disenchant.autoOpen and not InCombatLockdown() and not ns.DEFrame:IsOpen() then
         self:OpenWindow()
@@ -452,6 +462,7 @@ function DE:PLAYER_EQUIPMENT_CHANGED()
 end
 
 function DE:SPELLS_CHANGED()
+    self:TakeStockIfNeeded()
     self:Refresh()
 end
 

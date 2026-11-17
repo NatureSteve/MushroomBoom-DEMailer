@@ -216,12 +216,18 @@ function Groups:Rebuild()
     self.children = children
 end
 
--- Something about the groups changed: refresh the lookups and every window.
+-- Something about the groups changed: refresh the lookups, and only the
+-- windows that show groups (the editor and the Groups tab).
 function Groups:Changed(structural)
     if structural ~= false then
         self:Rebuild()
     end
-    ns:OnSettingsChanged()
+    if ns.GroupsEditor then
+        ns.GroupsEditor:Refresh()
+    end
+    if ns.GroupsTab then
+        ns.GroupsTab:Refresh()
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -611,7 +617,9 @@ function Groups:AddItems(id, itemIDs)
             added = added + 1
         end
     end
-    self:Changed()
+    if added > 0 then
+        self:Changed()
+    end
     return added, moved
 end
 
@@ -624,7 +632,9 @@ function Groups:RemoveItems(itemIDs)
             removed = removed + 1
         end
     end
-    self:Changed()
+    if removed > 0 then
+        self:Changed()
+    end
     return removed
 end
 
