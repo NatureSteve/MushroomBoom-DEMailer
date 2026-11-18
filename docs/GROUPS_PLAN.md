@@ -4,8 +4,8 @@ Status: **done (2026-11-16), released as DE Mail Groups, version 2.0.0.** Covere
 automated tests run outside the game (Lua 5.1 with a simulated WoW API), and checked
 in game by the user. This file is not loaded by the game or included in releases.
 
-The `## X-Release-Title: DE Mail Groups` line in `DEMailer.toc` names the 2.0.0
-release; change or remove it for the next version.
+The `## X-Release-Title: DE Mail Groups` line in `DEMailer.toc` named the 2.0.0
+release; it was removed for 2.0.1.
 
 ## Goal
 
