@@ -11,7 +11,7 @@ local Groups = ns.Groups
 L.G_SUBJECT         = "Items from DE Mailer"
 L.G_SEND_NOTHING    = "Nothing to send from your checked groups."
 L.G_SEND_NOTHING_ALL = "Nothing to send from your groups."
-L.G_NO_SPACE        = "Some partial stacks stayed behind (splitting needs a free slot in an ordinary bag)."
+L.G_NO_SPACE        = "Some partial stacks stayed behind (splitting needs a free bag slot)."
 L.G_SPLIT_FAILED    = "a stack couldn't be split"
 
 local SPLIT_TIMEOUT = 3 -- seconds to wait for a split stack to show up
@@ -24,17 +24,33 @@ local function Remaining(entry)
     return total
 end
 
--- An empty slot in an ordinary bag (not a herb or mining bag).
+local function EmptySlotIn(bag, exceptBag, exceptSlot)
+    for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+        if not C_Container.GetContainerItemInfo(bag, slot)
+            and not (bag == exceptBag and slot == exceptSlot) then
+            return slot
+        end
+    end
+end
+
+-- An empty slot in an ordinary bag (not a herb or mining bag). If those are
+-- full and the stack being split is in the Reagent Bag, a free slot there
+-- works too: anything already in it is a reagent.
 local function FindEmptySlot(exceptBag, exceptSlot)
     for bag = ns.FIRST_BAG, ns.LAST_BAG do
         local free, family = C_Container.GetContainerNumFreeSlots(bag)
         if (free or 0) > 0 and (family == nil or family == 0) then
-            for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-                if not C_Container.GetContainerItemInfo(bag, slot)
-                    and not (bag == exceptBag and slot == exceptSlot) then
-                    return bag, slot
-                end
+            local slot = EmptySlotIn(bag, exceptBag, exceptSlot)
+            if slot then
+                return bag, slot
             end
+        end
+    end
+    local reagentBag = ns.REAGENT_BAG
+    if reagentBag and exceptBag == reagentBag and (C_Container.GetContainerNumFreeSlots(reagentBag) or 0) > 0 then
+        local slot = EmptySlotIn(reagentBag, exceptBag, exceptSlot)
+        if slot then
+            return reagentBag, slot
         end
     end
 end

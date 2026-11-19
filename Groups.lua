@@ -654,11 +654,11 @@ function Groups:GetSendSet(all)
     return set
 end
 
--- Every mailable stack in your bags of an item that's in a group:
--- [itemID] = { { bag, slot, count, link, icon, quality }, ... }
+-- Every mailable stack in your bags (Reagent Bag included) of an item
+-- that's in a group: [itemID] = { { bag, slot, count, link, icon, quality }, ... }
 function Groups:ScanBags()
     local stacks = {}
-    for bag = ns.FIRST_BAG, ns.LAST_BAG do
+    for bag = ns.FIRST_BAG, ns.LAST_BAG_WITH_REAGENTS do
         for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
             local info = C_Container.GetContainerItemInfo(bag, slot)
             local itemID = info and info.itemID

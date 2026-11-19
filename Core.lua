@@ -166,6 +166,11 @@ local MAX_ATTACHMENTS     = ATTACHMENTS_MAX_SEND or 12
 
 ns.MAX_ATTACHMENTS = MAX_ATTACHMENTS
 ns.FIRST_BAG, ns.LAST_BAG = FIRST_BAG, LAST_BAG
+-- The Reagent Bag (its own slot, bag 5) holds only reagents, so gear scans
+-- skip it; mail groups need it, since herbs, cloth and ore live there.
+ns.REAGENT_BAG = EnumValue("BagIndex", "ReagentBag", nil)
+ns.LAST_BAG_WITH_REAGENTS = FIRST_BAG + (NUM_TOTAL_EQUIPPED_BAG_SLOTS
+    or ((NUM_BAG_SLOTS or 4) + (NUM_REAGENTBAG_SLOTS or 0)))
 ns.QUALITIES = {
     EnumValue("ItemQuality", "Uncommon", 2),
     EnumValue("ItemQuality", "Rare", 3),
