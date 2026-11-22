@@ -20,6 +20,7 @@ local PLACEHOLDER_ICON = "Interface\\Icons\\INV_Enchant_Disenchant"
 
 local frame, button
 local rows = {}
+Frame.rows = rows
 
 local function Play(sound)
     if SOUNDKIT and SOUNDKIT[sound] then
@@ -53,6 +54,16 @@ local function ItemInfoLine(item)
 end
 
 local FormatChance = ns.FormatChance
+
+-- The item's possible materials and, with a price source picked, their value.
+local function ItemValue(item)
+    local materials = ns.PossibleMaterials(item.itemID, item.quality, ItemLevel(item))
+    if not materials or not ns.Prices.IsEnabled() then
+        return materials
+    end
+    local value, missing = ns.Prices.DisenchantValue(materials)
+    return materials, value, missing
+end
 
 -------------------------------------------------------------------------------
 -- Position
@@ -144,9 +155,14 @@ local function CreateRow(parent, index)
     level:SetJustifyH("RIGHT")
     row.level = level
 
+    local value = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    value:SetPoint("RIGHT", level, "LEFT", -10, 0)
+    value:SetJustifyH("RIGHT")
+    row.value = value
+
     local name = row:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     name:SetPoint("LEFT", icon, "RIGHT", 6, 0)
-    name:SetPoint("RIGHT", level, "LEFT", -8, 0)
+    name:SetPoint("RIGHT", value, "LEFT", -8, 0)
     name:SetJustifyH("LEFT")
     name:SetWordWrap(false)
     row.name = name
@@ -167,6 +183,9 @@ local function SetRow(row, item, isNext)
     row.name:SetAlpha(dimmed and 0.5 or 1)
     row.level:SetText(ItemLevel(item) or "")
     row.level:SetAlpha(dimmed and 0.5 or 1)
+    local _, value = ItemValue(item)
+    row.value:SetText(value and ns.Prices.MoneyText(value) or "")
+    row.value:SetAlpha(dimmed and 0.5 or 1)
     row.selected:SetShown(isNext)
     row:Show()
     if GameTooltip:IsOwned(row) then
@@ -308,6 +327,26 @@ function Frame:Create()
     possibleLabel:SetScript("OnLeave", HideTooltip)
     self.possibleLabel = possibleLabel
 
+    local possibleValue = CreateFrame("Frame", nil, frame)
+    possibleValue:SetPoint("TOPRIGHT", -16, -114)
+    possibleValue:SetSize(160, 14)
+    local possibleValueText = possibleValue:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    possibleValueText:SetPoint("RIGHT")
+    possibleValueText:SetJustifyH("RIGHT")
+    possibleValue.text = possibleValueText
+    possibleValue:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(L.PRICE_VALUE, 1, 1, 1)
+        GameTooltip:AddLine(L.PRICE_VALUE_TIP:format(ns.Prices.SourceLabel()), nil, nil, nil, true)
+        if self.missing then
+            GameTooltip:AddLine(L.PRICE_PARTIAL, 1, 0.82, 0, true)
+        end
+        GameTooltip:Show()
+    end)
+    possibleValue:SetScript("OnLeave", HideTooltip)
+    possibleValue:Hide()
+    self.possibleValue = possibleValue
+
     self.possibleLines = {}
     for i = 1, POSSIBLE_LINES do
         local line = CreateFrame("Frame", nil, frame)
@@ -329,6 +368,11 @@ function Frame:Create()
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 GameTooltip:SetItemByID(self.itemID)
                 GameTooltip:AddLine(L.DE_CHANCE_TIP:format(self.chanceText), 1, 0.82, 0, true)
+                local price = ns.Prices.MaterialPrice(self.itemID)
+                if price then
+                    GameTooltip:AddLine(L.PRICE_EACH:format(ns.Prices.MoneyText(price), ns.Prices.SourceLabel()),
+                        1, 0.82, 0, true)
+                end
                 GameTooltip:Show()
             end
         end)
@@ -512,8 +556,19 @@ function Frame:Refresh()
     end
 
     -- Possible materials
-    local possible = nextItem and ns.PossibleMaterials(nextItem.itemID, nextItem.quality, ItemLevel(nextItem))
+    local possible, value, missing
+    if nextItem then
+        possible, value, missing = ItemValue(nextItem)
+    end
     self.possibleLabel:SetShown(possible ~= nil)
+    local showValue = possible ~= nil and ns.Prices.IsEnabled()
+    self.possibleValue.missing = missing
+    self.possibleValue.text:SetText(showValue and L.PRICE_VALUE_SHORT:format(
+        value and ns.Prices.MoneyText(value) or L.PRICE_NO_DATA) or "")
+    self.possibleValue:SetShown(showValue)
+    if not showValue and GameTooltip:IsOwned(self.possibleValue) then
+        HideTooltip()
+    end
     for i, line in ipairs(self.possibleLines) do
         local entry = possible and possible[i]
         if entry then

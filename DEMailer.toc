@@ -18,5 +18,6 @@ GroupsTab.lua
 Options.lua
 Minimap.lua
 Disenchant.lua
+Prices.lua
 DisenchantData.lua
 DisenchantFrame.lua

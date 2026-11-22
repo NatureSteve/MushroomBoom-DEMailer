@@ -221,6 +221,25 @@ function Options:Create()
         function(value)
             ns:SetDisenchantTooltip(value)
         end)
+    local createDropdown = Settings.CreateDropdown or Settings.CreateDropDown
+    if createDropdown and Settings.CreateControlTextContainer and Settings.VarType.String then
+        local priceSetting = Settings.RegisterProxySetting(category, "DEMAILER_PRICE_SOURCE",
+            Settings.VarType.String, L.PRICE_SOURCE, "none",
+            function()
+                return ns.db.disenchant.priceSource or "none"
+            end,
+            function(value)
+                ns:SetPriceSource(value)
+            end)
+        createDropdown(category, priceSetting, function()
+            local container = Settings.CreateControlTextContainer()
+            for _, option in ipairs(ns.Prices.Options()) do
+                container:Add(option.value, option.label, option.tip)
+            end
+            return container:GetData()
+        end, L.PRICE_SOURCE_TIP)
+        self.settings[#self.settings + 1] = priceSetting
+    end
 
     -- Minimap
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L.MINIMAP))

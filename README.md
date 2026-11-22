@@ -63,7 +63,7 @@ The same settings are also available away from the mailbox:
   - **Send Automatically**.
   - **Items You Keep:** reset to send kept items again.
   - **Send Groups Automatically** and a button to open the **Group Editor**.
-  - **Disenchanting Window**, **Open When You Pick Up Gear** and **Show Materials in Tooltips** (see below).
+  - **Disenchanting Window**, **Open When You Pick Up Gear** and **Show Materials in Tooltips** and **Price Source** (see below).
   - **Show Minimap Button**.
 - **Minimap button:**
   - Left-click opens the options.
@@ -83,6 +83,7 @@ On characters that know Disenchant, DE Mailer records disenchantable gear as you
 - **The next item** is shown at the top. Press **Disenchant** once for each item. For a key instead, bind **Disenchant next item** in Keybindings.
 - **Possible materials** under the next item shows what it usually gives: the chance, the material and how many. Hover a line to see the material.
 - **Tooltips:** every disenchantable item's tooltip lists the same possible materials under "Disenchants into:". Turn this off with **Show Materials in Tooltips** in the options.
+- **Disenchant value:** pick an auction addon under **Price Source** in the options (Auctionator, or TradeSkillMaster's Market Value, Min Buyout or Recent Value). The window then shows the next item's value beside Possible materials and each item's value in the list, and tooltips add a "Disenchant value:" line. It's the average a disenchant is worth: each material's price, weighted by its chance and count. DE Mailer keeps no prices itself, so the auction addon must be installed and have scanned the Auction House. **None** (the default) hides values.
 - **This session** shows the materials you've got and how many items you've disenchanted.
 - **In the list**, click an item to keep it (it's greyed out and is never mailed or disenchanted). Right-click an item to take it off the list.
 - **Add from Bags** adds disenchantable gear that was already in your bags before recording started.

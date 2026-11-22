@@ -188,7 +188,12 @@ local function IsSecret(value)
 end
 
 local function AddMaterials(tooltip, data)
-    if (tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip) or not ns.db or not ns.db.disenchant.tooltip then
+    if (tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip) or not ns.db then
+        return
+    end
+    local showMaterials = ns.db.disenchant.tooltip
+    local showValue = ns.Prices.IsEnabled()
+    if not showMaterials and not showValue then
         return
     end
     local itemID = data and data.id
@@ -210,9 +215,19 @@ local function AddMaterials(tooltip, data)
         return
     end
     tooltip:AddLine(" ")
-    tooltip:AddLine(L.DE_TOOLTIP_HEADER, 1, 0.82, 0)
-    for _, entry in ipairs(materials) do
-        tooltip:AddLine(("  %s  %s"):format(ns.FormatChance(entry.chance), ns.MaterialLabel(entry)), 1, 1, 1)
+    if showMaterials then
+        tooltip:AddLine(L.DE_TOOLTIP_HEADER, 1, 0.82, 0)
+        for _, entry in ipairs(materials) do
+            tooltip:AddLine(("  %s  %s"):format(ns.FormatChance(entry.chance), ns.MaterialLabel(entry)), 1, 1, 1)
+        end
+    end
+    if showValue then
+        local value = ns.Prices.DisenchantValue(materials)
+        if value then
+            tooltip:AddDoubleLine(L.PRICE_VALUE, ns.Prices.MoneyText(value), 1, 0.82, 0, 1, 1, 1)
+        else
+            tooltip:AddDoubleLine(L.PRICE_VALUE, L.PRICE_NO_DATA, 1, 0.82, 0, 0.5, 0.5, 0.5)
+        end
     end
 end
 
