@@ -15,6 +15,7 @@ GroupsSend.lua
 GroupsFrame.lua
 UI.lua
 GroupsTab.lua
+EnchantConfirm.lua
 Options.lua
 Minimap.lua
 Disenchant.lua

@@ -198,6 +198,7 @@ local DEFAULTS = {
     recipients = {}, -- ["Realm-Faction"] = "Name"
     qualities  = { [2] = true, [3] = true, [4] = false },
     autoSend   = false,
+    skipReplaceEnchant = false, -- answer Yes to "replace this enchant?" (EnchantConfirm.lua)
     excluded   = {}, -- [itemID] = true for items you never want mailed
     minimap    = { hide = false, angle = 225 }, -- angle in degrees around the minimap
     disenchant = { enabled = true, autoOpen = false, tooltip = true, priceSource = "ahdb_market" }, -- the Disenchanting window and tooltips

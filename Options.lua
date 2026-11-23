@@ -221,6 +221,13 @@ function Options:Create()
         function(value)
             ns:SetDisenchantTooltip(value)
         end)
+    AddCheckbox("DEMAILER_SKIP_REPLACE", L.SKIP_REPLACE, L.SKIP_REPLACE_TIP, false,
+        function()
+            return ns.db.skipReplaceEnchant and true or false
+        end,
+        function(value)
+            ns:SetSkipReplaceEnchant(value)
+        end)
     local createDropdown = Settings.CreateDropdown or Settings.CreateDropDown
     if createDropdown and Settings.CreateControlTextContainer and Settings.VarType.String then
         local priceSetting = Settings.RegisterProxySetting(category, "DEMAILER_PRICE_SOURCE",

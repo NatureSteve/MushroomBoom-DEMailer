@@ -63,7 +63,8 @@ The same settings are also available away from the mailbox:
   - **Send Automatically**.
   - **Items You Keep:** reset to send kept items again.
   - **Send Groups Automatically** and a button to open the **Group Editor**.
-  - **Disenchanting Window**, **Open When You Pick Up Gear** and **Show Materials in Tooltips** and **Price Source** (see below).
+  - **Disenchanting Window**, **Open When You Pick Up Gear**, **Show Materials in Tooltips** and **Price Source** (see below).
+  - **Skip Replace Enchant Confirmation:** answer Yes for you when an enchant would replace one an item already has (your gear, the trade window or the profession window). Off by default; each replacement is noted in chat.
   - **Show Minimap Button**.
 - **Minimap button:**
   - Left-click opens the options.
