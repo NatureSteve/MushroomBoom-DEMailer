@@ -224,9 +224,9 @@ function Options:Create()
     local createDropdown = Settings.CreateDropdown or Settings.CreateDropDown
     if createDropdown and Settings.CreateControlTextContainer and Settings.VarType.String then
         local priceSetting = Settings.RegisterProxySetting(category, "DEMAILER_PRICE_SOURCE",
-            Settings.VarType.String, L.PRICE_SOURCE, "none",
+            Settings.VarType.String, L.PRICE_SOURCE, ns.DEFAULTS.disenchant.priceSource,
             function()
-                return ns.db.disenchant.priceSource or "none"
+                return ns.Prices.CurrentKey()
             end,
             function(value)
                 ns:SetPriceSource(value)

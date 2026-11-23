@@ -1,7 +1,7 @@
 -- DE Mailer: Prices.lua
--- Disenchant value from an auction addon you already have installed. DE
--- Mailer keeps no prices of its own: it asks the addon picked in Options >
--- Disenchanting > Price Source for each possible material and adds them up,
+-- Disenchant value from MushroomBoom AHDB. DE Mailer keeps no prices of
+-- its own: it asks AHDB, using the price picked in Options >
+-- Disenchanting > Price Source, for each possible material and adds them up,
 -- weighted by how often each one drops.
 
 local ADDON_NAME, ns = ...
@@ -11,7 +11,7 @@ local Prices = {}
 ns.Prices = Prices
 
 L.PRICE_SOURCE         = "Price Source"
-L.PRICE_SOURCE_TIP     = "Where disenchant values come from. Shown in item tooltips and the Disenchanting window. Needs the auction addon to be installed and to have scanned the Auction House."
+L.PRICE_SOURCE_TIP     = "Where disenchant values come from. Shown in item tooltips and the Disenchanting window. Prices come from the MushroomBoom AHDB addon, for your own auction house."
 L.PRICE_NONE           = "None"
 L.PRICE_NONE_TIP       = "Don't show disenchant values."
 L.PRICE_MISSING        = "%s (not loaded)"
@@ -22,40 +22,28 @@ L.PRICE_VALUE_TIP      = "The average a disenchant is worth at %s prices. Each d
 L.PRICE_PARTIAL        = "Some materials have no price yet, so the real value may be higher."
 L.PRICE_EACH           = "%s each at the Auction House (%s)."
 
-local function FromAuctionator(itemID)
-    local api = Auctionator and Auctionator.API and Auctionator.API.v1
-    if not (api and api.GetAuctionPriceByItemID) then
-        return nil
-    end
-    local ok, price = pcall(api.GetAuctionPriceByItemID, ADDON_NAME, itemID)
-    return ok and price or nil
-end
-
--- TradeSkillMaster's public price API, with one of its own price names.
-local function FromTSM(priceName)
+-- MushroomBoom AHDB's public API (global MushroomBoomAHDB): copper per
+-- unit at this character's own auction house, or nil.
+local function FromAHDB(priceName)
     return function(itemID)
-        if not (TSM_API and TSM_API.GetCustomPriceValue) then
+        local api = MushroomBoomAHDB
+        if not (api and api.GetPrice) then
             return nil
         end
-        local ok, price = pcall(TSM_API.GetCustomPriceValue, priceName, "i:" .. itemID)
+        local ok, price = pcall(api.GetPrice, itemID, priceName)
         return ok and price or nil
     end
 end
 
-local function HasAuctionator()
-    local api = Auctionator and Auctionator.API and Auctionator.API.v1
-    return api ~= nil and api.GetAuctionPriceByItemID ~= nil
-end
-
-local function HasTSM()
-    return TSM_API ~= nil and TSM_API.GetCustomPriceValue ~= nil
+local function HasAHDB()
+    return MushroomBoomAHDB ~= nil and MushroomBoomAHDB.GetPrice ~= nil
 end
 
 local SOURCES = {
-    { key = "auctionator",  label = "Auctionator",                 available = HasAuctionator, price = FromAuctionator },
-    { key = "tsm_market",   label = "TradeSkillMaster: Market Value", available = HasTSM,      price = FromTSM("DBMarket") },
-    { key = "tsm_minbuyout", label = "TradeSkillMaster: Min Buyout",  available = HasTSM,      price = FromTSM("DBMinBuyout") },
-    { key = "tsm_recent",   label = "TradeSkillMaster: Recent Value", available = HasTSM,      price = FromTSM("DBRecent") },
+    { key = "ahdb_market", label = "AHDB: Market Value",    available = HasAHDB, price = FromAHDB("market") },
+    { key = "ahdb_min",    label = "AHDB: Min Buyout",      available = HasAHDB, price = FromAHDB("min") },
+    { key = "ahdb_avg3",   label = "AHDB: 3-Day Average",   available = HasAHDB, price = FromAHDB("avg3") },
+    { key = "ahdb_avg14",  label = "AHDB: 14-Day Average",  available = HasAHDB, price = FromAHDB("avg14") },
 }
 local BY_KEY = {}
 for _, source in ipairs(SOURCES) do
@@ -63,10 +51,19 @@ for _, source in ipairs(SOURCES) do
 end
 Prices.SOURCES = SOURCES
 
+-- The saved choice; one this version doesn't know (from an older build)
+-- counts as the default.
+function Prices.CurrentKey()
+    local key = ns.db and ns.db.disenchant.priceSource
+    if key == "none" or BY_KEY[key] then
+        return key
+    end
+    return ns.DEFAULTS.disenchant.priceSource
+end
+
 -- The picked source, if it's installed right now.
 function Prices.GetSource()
-    local key = ns.db and ns.db.disenchant.priceSource
-    local source = key and BY_KEY[key]
+    local source = BY_KEY[Prices.CurrentKey()]
     if source and source.available() then
         return source
     end
